@@ -1,0 +1,24 @@
+Cardiotocographic=read.csv(file.choose())
+mydata=Cardiotocographic
+str(mydata)
+mydata$NSPF=as.factor(as.character(mydata$NSP))
+mydata$out=relevel(mydata$NSPF,ref = '1')
+
+#Develop multinominal logistic regresion model
+library(nnet)
+mymodel=multinom(out~LB+AC+FM,data=mydata)
+summary(mymodel)  
+
+#Predict
+predict(mymodel,mydata[c(2,100,400),],type='prob')
+
+#Misclassification Error
+cm=table(predict(mymodel),mydata$NSPF)
+print(cm)
+1-sum(diag(cm))/sum(cm)
+
+#2 tailed z test
+z=summary(mymodel)$coefficients/summary(mymodel)$standard.errors
+p=(1-pnorm(abs(z)))*2
+p
+
